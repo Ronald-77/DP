@@ -5,3 +5,7 @@ dist-server/
 coverage/
 *.log
 .DS_Store
+__pycache__/
+.pytest_cache/
+.venv/
+*.py[cod]

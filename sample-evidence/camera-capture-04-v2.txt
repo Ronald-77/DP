@@ -1,0 +1,7 @@
+CUSTODIA TEST EVIDENCE - VERSION 2
+Case: CASE-TEST-001
+Source: Fictional intersection camera 04
+Captured: 2026-08-30T08:15:00Z
+Frames: 18422
+Version note: Added a fictional examiner review note.
+Examiner note: This file is intentionally different so immutable version history can be tested.

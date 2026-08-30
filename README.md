@@ -1,14 +1,15 @@
 # Custodia — distributed digital evidence
 
-Custodia is a runnable forensic evidence and chain-of-custody platform. It stores files as SHA-256-addressed chunks across isolated storage nodes, reads through a majority quorum, preserves immutable versions, and repairs modified or missing replicas from verified peers.
+Custodia is a runnable forensic evidence and chain-of-custody platform built with **Python/FastAPI and React**. It stores files as SHA-256-addressed chunks across isolated storage nodes, reads through a majority quorum, preserves immutable versions, and repairs modified or missing replicas from verified peers.
 
-![Node](https://img.shields.io/badge/Node-24-244d3d) ![React](https://img.shields.io/badge/React-TypeScript-147d70) ![Integrity](https://img.shields.io/badge/integrity-SHA--256-246b61)
+![Python](https://img.shields.io/badge/Python-FastAPI-244d3d) ![React](https://img.shields.io/badge/React-TypeScript-147d70) ![Integrity](https://img.shields.io/badge/integrity-SHA--256-246b61)
 
 ## Run it
 
-Requirements: Node.js 20 or newer.
+Requirements: Python 3.11 or newer and Node.js 20 or newer.
 
 ```powershell
+npm.cmd run setup:python
 npm.cmd install
 npm.cmd run dev
 ```
@@ -20,7 +21,7 @@ npm.cmd run build
 npm.cmd start
 ```
 
-Then open <http://localhost:8787>.
+Then open <http://localhost:8787>. Interactive FastAPI documentation is available at <http://localhost:8787/docs>.
 
 ## What is implemented
 
@@ -79,12 +80,12 @@ The demo identity is selected with the `x-user-id` header (`usr-morgan`, `usr-pr
 
 ## Production stack path
 
-The runnable edition deliberately uses filesystem and atomic-JSON adapters so it works with no external infrastructure. Its boundaries map directly to the suggested stack:
+The runnable Python edition deliberately uses filesystem and atomic-JSON adapters so it works with no external infrastructure. Its boundaries map directly to the suggested production stack:
 
 - Replace each node directory adapter with a MinIO bucket client; keep content hashes as object keys.
 - Move manifests and identity grants into PostgreSQL with serializable transactions and row-level security.
 - Publish committed audit events through Kafka using an outbox table; run verification/repair as consumer workers.
-- Expose the same service contract through Go + gRPC for node-to-node traffic, retaining the HTTP gateway for React.
+- Add gRPC for node-to-node traffic while retaining FastAPI as the HTTP gateway for React.
 - Sign ledger heads with a KMS-backed asymmetric key and periodically anchor them to external trusted timestamps.
 
 Before evidentiary production use, add organization-specific retention/legal-hold policy, OIDC/MFA, KMS signing, TLS/mTLS, malware isolation, external time-stamping, secrets management, and an accredited validation process.
@@ -92,9 +93,12 @@ Before evidentiary production use, add organization-specific retention/legal-hol
 ## Verification
 
 ```powershell
+npm.cmd run setup:python
 npm.cmd run typecheck
 npm.cmd test
 npm.cmd run build
 ```
 
 The tests cover deterministic chunk replication and quorum reconstruction, modified-replica detection and repair, audit-chain validity, version retrieval, and role capabilities.
+
+The Python backend lives in `backend/`: `main.py` defines the FastAPI contract and `service.py` contains the storage, cryptography, quorum, versioning, and repair engine. Python tests live in `tests/`.

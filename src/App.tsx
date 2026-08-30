@@ -109,7 +109,16 @@ function EvidenceDetailModal({ id, users, currentUser, onClose, onChanged, notif
       <div className="detail-head">
         <button className="back-link" onClick={onClose}><ArrowLeft />All evidence</button>
         <div className="detail-title-row"><div className="large-file-icon"><FileCheck2 /></div><div className="detail-title"><div><span className="mono muted">{detail.id}</span><StatusPill status={detail.status} /></div><h2>{detail.name}</h2><p>{detail.description || 'No description provided.'}</p></div><button className="icon-button" onClick={onClose}><X /></button></div>
-        <div className="detail-actions"><button className="button ghost" onClick={() => downloadEvidence(detail.id)}><Download />Download</button><button className="button ghost" onClick={report}><ClipboardCheck />Custody report</button><button className="button ghost" onClick={() => setVersioning(true)}><FilePlus2 />New version</button><button className="button primary" disabled={!!busy} onClick={() => operation(detail.status === 'attention' ? 'repair' : 'verify')}>{busy ? <RefreshCcw className="spin" /> : detail.status === 'attention' ? <Sparkles /> : <ShieldCheck />}{detail.status === 'attention' ? 'Repair replicas' : 'Verify integrity'}</button></div>
+        <div className="detail-actions">
+          <div className="workflow-hint"><span>NEXT STEP</span><b>{detail.status === 'attention' ? 'Review and repair the flagged replica' : 'Verify the evidence before using it'}</b></div>
+          <div className="detail-button-group">
+            <button className="button ghost" onClick={() => downloadEvidence(detail.id)}><Download />Download</button>
+            <button className="button ghost" onClick={report}><ClipboardCheck />Custody report</button>
+            <button className="button ghost" onClick={() => setVersioning(true)}><FilePlus2 />New version</button>
+            <button className="button verify" disabled={!!busy} onClick={() => operation('verify')}><ShieldCheck />Verify integrity</button>
+            {detail.status === 'attention' && <button className="button primary" disabled={!!busy} onClick={() => operation('repair')}><Sparkles />Repair replicas</button>}
+          </div>
+        </div>
       </div>
       <div className="detail-body">
         {result && <div className={`scan-result ${result.status}`}><ShieldCheck /><div><b>Integrity scan: {result.status}</b><span>{result.healthyReplicas}/{result.totalReplicas} replicas healthy · {result.repairedReplicas} reconstructed</span></div><button onClick={() => setResult(undefined)}><X /></button></div>}
@@ -126,10 +135,11 @@ function EvidenceDetailModal({ id, users, currentUser, onClose, onChanged, notif
   </>;
 }
 
-function OverviewPage({ overview, evidence, audit, nodes, onOpen, onUpload }: { overview?: Overview; evidence: Evidence[]; audit: AuditEvent[]; nodes: StorageNode[]; onOpen: (id: string) => void; onUpload: () => void }) {
+function OverviewPage({ overview, evidence, audit, nodes, currentUser, onOpen, onUpload }: { overview?: Overview; evidence: Evidence[]; audit: AuditEvent[]; nodes: StorageNode[]; currentUser?: User; onOpen: (id: string) => void; onUpload: () => void }) {
   const integrity = overview?.evidence ? Math.round((overview.verified / overview.evidence) * 100) : 100;
+  const firstName = currentUser?.name.split(' ')[0] || 'there';
   return <>
-    <header className="page-header hero-header"><div><span className="eyebrow">DISTRIBUTED EVIDENCE OPERATIONS</span><h1>Good morning, Morgan.</h1><p>Every byte accounted for. Every action attributable.</p></div><button className="button primary" onClick={onUpload}><Plus />Register evidence</button></header>
+    <header className="page-header hero-header"><div><span className="eyebrow">DISTRIBUTED EVIDENCE OPERATIONS</span><h1>Good morning, {firstName}.</h1><p>Every byte accounted for. Every action attributable.</p></div><button className="button primary" onClick={onUpload}><Plus />Register evidence</button></header>
     <div className="stat-grid">
       <article className="stat-card"><div className="stat-icon teal"><Archive /></div><div><span>TOTAL EVIDENCE</span><strong>{overview?.evidence ?? '—'}</strong><small>Across {overview?.cases ?? 0} active cases</small></div><span className="stat-trend">LIVE</span></article>
       <article className="stat-card"><div className="stat-icon green"><ShieldCheck /></div><div><span>INTEGRITY SCORE</span><strong>{integrity}%</strong><small>{overview?.verified ?? 0} objects verified</small></div><span className="stat-trend safe">SECURE</span></article>
@@ -185,7 +195,7 @@ export default function App() {
     <aside className={sidebar ? 'open' : ''}><div className="sidebar-top"><Brand /><button className="mobile-close" onClick={() => setSidebar(false)}><X /></button></div><nav>{nav.map(({ id, label, icon: Icon, count }) => <button key={id} className={page === id ? 'active' : ''} onClick={() => { setPage(id); setSidebar(false); }}><Icon /><span>{label}</span>{count && <em>{count}</em>}</button>)}</nav><div className="sidebar-spacer" /><div className="security-card"><div><ShieldCheck /></div><span><b>Custodia secure</b><small>Ledger head verified</small></span><Check /></div><div className="sidebar-foot"><span>ENVIRONMENT</span><b><i /> Local evidence network</b><small>v1.0 · SHA-256</small></div></aside>
     {sidebar && <div className="sidebar-overlay" onClick={() => setSidebar(false)} />}
     <main><div className="topbar"><button className="menu-button" onClick={() => setSidebar(true)}><Menu /></button><div><span>Custodia /</span> {pageTitles[page]}</div><div className="top-actions"><button className="notification-button"><Bell />{overview?.attention ? <i /> : null}</button><div className="profile"><button onClick={() => setProfileOpen((open) => !open)}><span className="avatar">{currentUser?.initials || '—'}</span><span><b>{currentUser?.name || 'Loading'}</b><small>{currentUser?.role}</small></span><ChevronDown /></button>{profileOpen && <div className="profile-menu"><span>ACT AS DEMO USER</span>{users.map((user) => <button key={user.id} className={user.id === currentUser?.id ? 'active' : ''} onClick={() => switchUser(user.id)}><span className="avatar small">{user.initials}</span><span><b>{user.name}</b><small>{user.role}</small></span>{user.id === currentUser?.id && <Check />}</button>)}</div>}</div></div></div>
-      <div className="page-content">{page === 'overview' && <OverviewPage overview={overview} evidence={evidence} audit={audit} nodes={nodes} onOpen={setSelectedEvidence} onUpload={() => setUploading(true)} />}{page === 'evidence' && <EvidencePage evidence={evidence} onOpen={setSelectedEvidence} onUpload={() => setUploading(true)} />}{page === 'nodes' && <NodesPage nodes={nodes} currentUser={currentUser} onChanged={load} notify={notify} />}{page === 'audit' && <AuditPage events={audit} valid={chain.valid} head={chain.head} />}</div>
+      <div className="page-content">{page === 'overview' && <OverviewPage overview={overview} evidence={evidence} audit={audit} nodes={nodes} currentUser={currentUser} onOpen={setSelectedEvidence} onUpload={() => setUploading(true)} />}{page === 'evidence' && <EvidencePage evidence={evidence} onOpen={setSelectedEvidence} onUpload={() => setUploading(true)} />}{page === 'nodes' && <NodesPage nodes={nodes} currentUser={currentUser} onChanged={load} notify={notify} />}{page === 'audit' && <AuditPage events={audit} valid={chain.valid} head={chain.head} />}</div>
     </main>
     {uploading && <UploadModal onClose={() => setUploading(false)} onUploaded={() => { setUploading(false); load(); notify('success', 'Evidence hashed, distributed and committed to the custody ledger.'); }} />}
     {selectedEvidence && <EvidenceDetailModal id={selectedEvidence} users={users} currentUser={currentUser} onClose={() => setSelectedEvidence(undefined)} onChanged={load} notify={notify} />}

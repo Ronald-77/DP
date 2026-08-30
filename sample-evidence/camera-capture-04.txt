@@ -1,0 +1,6 @@
+CUSTODIA TEST EVIDENCE
+Case: CASE-TEST-001
+Source: Fictional intersection camera 04
+Captured: 2026-08-30T08:15:00Z
+Frames: 18422
+Operator note: Harmless sample data for testing upload, hashing, replication, verification, and reporting.

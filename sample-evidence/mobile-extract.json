@@ -1,0 +1,9 @@
+{
+  "caseId": "CASE-TEST-001",
+  "deviceId": "DEMO-MOBILE-8841",
+  "acquisitionMethod": "logical",
+  "acquiredAt": "2026-08-30T09:30:00Z",
+  "fileCount": 12,
+  "integrityChecked": true,
+  "note": "Fictional sample data. No real personal information."
+}
