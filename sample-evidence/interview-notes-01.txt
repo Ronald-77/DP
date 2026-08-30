@@ -1,0 +1,5 @@
+FICTIONAL INTERVIEW NOTES
+Case: CASE-TEST-001
+Witness: Demo Witness A
+Interview date: 2026-08-30
+Summary: Sample notes for testing text evidence intake.

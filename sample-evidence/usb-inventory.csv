@@ -1,0 +1,4 @@
+device_id,model,capacity,status,examiner
+USB-DEMO-01,Training Flash Drive,16 GB,acquired,Alex Examiner
+USB-DEMO-02,Training Flash Drive,32 GB,sealed,Alex Examiner
+USB-DEMO-03,Training External Drive,128 GB,returned,Alex Examiner

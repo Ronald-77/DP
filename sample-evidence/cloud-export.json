@@ -1,0 +1,8 @@
+{
+  "caseId": "CASE-TEST-002",
+  "provider": "Demo Cloud",
+  "exportId": "EXPORT-DEMO-001",
+  "exportedAt": "2026-08-30T11:20:00Z",
+  "objectCount": 3,
+  "objects": ["notes.txt", "activity.csv", "settings.json"]
+}

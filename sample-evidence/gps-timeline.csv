@@ -1,0 +1,4 @@
+timestamp,latitude,longitude,source
+2026-08-30T07:30:00Z,16.8409,96.1735,demo-device
+2026-08-30T07:45:00Z,16.8451,96.1752,demo-device
+2026-08-30T08:00:00Z,16.8488,96.1801,demo-device

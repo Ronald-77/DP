@@ -1,0 +1,8 @@
+{
+  "caseId": "CASE-TEST-003",
+  "imageName": "demo-disk-image.dd",
+  "sectorSize": 512,
+  "sectorCount": 4096,
+  "acquisitionTool": "Custodia Test Collector",
+  "source": "fictional training workstation"
+}

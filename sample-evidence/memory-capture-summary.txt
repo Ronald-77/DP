@@ -1,0 +1,6 @@
+MEMORY CAPTURE SUMMARY - FICTIONAL
+Case: CASE-TEST-003
+Capture ID: MEM-DEMO-001
+Tool: Custodia Training Collector
+Size: 64 MB
+Notes: Sample summary for upload and version testing.

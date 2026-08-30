@@ -1,0 +1,9 @@
+{
+  "caseId": "CASE-TEST-002",
+  "browser": "Demo Browser",
+  "collectedAt": "2026-08-30T10:10:00Z",
+  "entries": [
+    {"time": "2026-08-30T09:01:00Z", "url": "https://example.test/portal", "title": "Demo Portal"},
+    {"time": "2026-08-30T09:03:00Z", "url": "https://example.test/report", "title": "Demo Report"}
+  ]
+}

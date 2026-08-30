@@ -1,0 +1,4 @@
+path,sha256,classification,review_status
+/demo/temp/a.bin,cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc,training,sample
+/demo/cache/b.dat,dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd,training,sample
+/demo/logs/c.log,eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,training,reviewed

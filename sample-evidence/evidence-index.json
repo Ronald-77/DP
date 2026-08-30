@@ -1,0 +1,10 @@
+{
+  "indexName": "fictional-training-index",
+  "createdAt": "2026-08-30T12:00:00Z",
+  "caseCount": 4,
+  "evidence": [
+    {"name": "interview-notes-01.txt", "caseId": "CASE-TEST-001", "type": "notes"},
+    {"name": "disk-image-manifest.json", "caseId": "CASE-TEST-003", "type": "manifest"},
+    {"name": "acquisition-report.html", "caseId": "CASE-TEST-004", "type": "report"}
+  ]
+}
