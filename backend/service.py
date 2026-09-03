@@ -246,11 +246,16 @@ class EvidenceService:
             corrupt_replicas: list[dict[str, Any]] = []
             healthy_replicas = 0
             repaired_replicas = 0
+            repaired_keys: set[tuple[str, str]] = set()
             unrecoverable = False
             for chunk in version["chunks"]:
                 healthy: bytes | None = None
                 bad: list[dict[str, str]] = []
                 for node_id in chunk["replicas"]:
+                    node = next((candidate for candidate in self.db["nodes"] if candidate["id"] == node_id), None)
+                    if node is None or node["state"] == "offline":
+                        bad.append({"nodeId": node_id, "reason": "offline"})
+                        continue
                     try:
                         replica = self.object_path(node_id, chunk["hash"]).read_bytes()
                         if sha256(replica) == chunk["hash"]:
@@ -265,13 +270,23 @@ class EvidenceService:
                     unrecoverable = True
                 if repair and healthy is not None:
                     for bad_replica in bad:
+                        target = next((candidate for candidate in self.db["nodes"] if candidate["id"] == bad_replica["nodeId"]), None)
+                        if bad_replica["reason"] not in {"hash_mismatch", "missing"} or target is None or target["state"] == "offline":
+                            continue
                         if bad_replica["reason"] == "hash_mismatch":
                             self.quarantine(bad_replica["nodeId"], chunk["hash"])
                         self.write_object(bad_replica["nodeId"], chunk["hash"], healthy, overwrite=True)
                         repaired_replicas += 1
+                        repaired_keys.add((bad_replica["nodeId"], chunk["hash"]))
 
-            status = "unrecoverable" if unrecoverable else "degraded" if corrupt_replicas else "healthy"
-            evidence["status"] = "attention" if unrecoverable or (corrupt_replicas and not repair) else "verified"
+            unresolved = []
+            if repair:
+                for item in corrupt_replicas:
+                    if (item["nodeId"], item["chunkHash"]) not in repaired_keys:
+                        unresolved.append(item)
+            remaining_issues = unresolved if repair else corrupt_replicas
+            status = "unrecoverable" if unrecoverable else "degraded" if remaining_issues else "healthy"
+            evidence["status"] = "attention" if status != "healthy" else "verified"
             evidence["lastVerifiedAt"] = utc_now()
             self.append_audit(
                 actor, "INTEGRITY_REPAIR" if repair else "INTEGRITY_VERIFIED",
@@ -284,7 +299,7 @@ class EvidenceService:
                 "totalReplicas": len(version["chunks"]) * self.replication_factor,
                 "healthyReplicas": healthy_replicas, "corruptReplicas": corrupt_replicas,
                 "repairedReplicas": repaired_replicas,
-                "status": "healthy" if repair and not unrecoverable else status,
+                "status": status,
             }
             self.metadata.save(self.db)
             return deepcopy(result)

@@ -32,3 +32,16 @@ export function downloadEvidence(id: string, version?: number) {
       const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
     });
 }
+
+export async function downloadCustodyReport(id: string) {
+  const response = await fetch(`/api/evidence/${id}/report.pdf`, { headers: { 'x-user-id': getSelectedUser() } });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ error: response.statusText }));
+    throw new Error(body.error || body.detail || 'PDF report download failed');
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get('content-disposition') || '';
+  const filename = disposition.match(/filename="?([^";]+)"?/)?.[1] || `${id}-chain-of-custody.pdf`;
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
+}

@@ -44,6 +44,34 @@ def test_finds_quarantines_and_repairs_modified_replica(tmp_path: Path) -> None:
     assert any((tmp_path / "nodes" / fault["nodeId"] / "quarantine").iterdir())
 
 
+def test_integrity_verification_respects_offline_nodes(tmp_path: Path) -> None:
+    service = EvidenceService(tmp_path, replication_factor=3, chunk_size=1024)
+    service.init(seed=False)
+    administrator = next(user for user in service.get_users() if user["role"] == "administrator")
+    intake = service.upload(content=b"offline node test", name="offline.txt", mime_type="text/plain", case_id="CASE-OFFLINE", actor=administrator)
+    evidence_id = intake["evidence"]["id"]
+    replicas = intake["version"]["chunks"][0]["replicas"]
+
+    service.set_node_state(replicas[0], "offline", administrator)
+    degraded = service.verify(evidence_id, administrator, repair=False)
+    assert degraded["status"] == "degraded"
+    assert degraded["healthyReplicas"] == 2
+    assert degraded["corruptReplicas"][0]["reason"] == "offline"
+
+    service.verify(evidence_id, administrator, repair=True)
+    assert service.get_evidence_by_id(evidence_id)["status"] == "attention"
+
+    service.set_node_state(replicas[0], "online", administrator)
+    healthy = service.verify(evidence_id, administrator, repair=False)
+    assert healthy["status"] == "healthy"
+
+    for node_id in replicas:
+        service.set_node_state(node_id, "offline", administrator)
+    unavailable = service.verify(evidence_id, administrator, repair=False)
+    assert unavailable["status"] == "unrecoverable"
+    assert unavailable["healthyReplicas"] == 0
+
+
 def test_versions_permissions_and_http_contract(tmp_path: Path) -> None:
     service = make_service(tmp_path)
     investigator = next(user for user in service.get_users() if user["role"] == "investigator")

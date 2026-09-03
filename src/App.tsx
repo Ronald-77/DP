@@ -5,7 +5,7 @@ import {
   HardDrive, History, KeyRound, LayoutDashboard, LockKeyhole, Menu, Network, Plus, RefreshCcw, Search,
   Server, Shield, ShieldAlert, ShieldCheck, Sparkles, UploadCloud, UserRound, Users, X, Zap,
 } from 'lucide-react';
-import { api, downloadEvidence, getSelectedUser, setSelectedUser } from './api';
+import { api, downloadCustodyReport, downloadEvidence, getSelectedUser, setSelectedUser } from './api';
 import type { AuditEvent, Evidence, EvidenceDetail, Overview, StorageNode, User, Verification } from './types';
 
 type Page = 'overview' | 'evidence' | 'nodes' | 'audit';
@@ -96,11 +96,8 @@ function EvidenceDetailModal({ id, users, currentUser, onClose, onChanged, notif
     finally { setBusy(''); }
   };
   const report = async () => {
-    try {
-      const body = await api(`/evidence/${id}/report`); const blob = new Blob([JSON.stringify(body, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${id}-chain-of-custody.json`; anchor.click(); URL.revokeObjectURL(url);
-      notify('success', 'Chain-of-custody report generated.');
-    } catch (error) { notify('error', (error as Error).message); }
+    try { await downloadCustodyReport(id); notify('success', 'PDF chain-of-custody report generated.'); }
+    catch (error) { notify('error', (error as Error).message); }
   };
   if (!detail) return <Modal wide onClose={onClose}><div className="loading-panel"><RefreshCcw className="spin" />Loading evidence manifest…</div></Modal>;
   const uploader = users.find((user) => user.id === detail.uploadedBy);
@@ -113,7 +110,7 @@ function EvidenceDetailModal({ id, users, currentUser, onClose, onChanged, notif
           <div className="workflow-hint"><span>NEXT STEP</span><b>{detail.status === 'attention' ? 'Review and repair the flagged replica' : 'Verify the evidence before using it'}</b></div>
           <div className="detail-button-group">
             <button className="button ghost" onClick={() => downloadEvidence(detail.id)}><Download />Download</button>
-            <button className="button ghost" onClick={report}><ClipboardCheck />Custody report</button>
+            <button className="button ghost" onClick={report}><ClipboardCheck />PDF custody report</button>
             <button className="button ghost" onClick={() => setVersioning(true)}><FilePlus2 />New version</button>
             <button className="button verify" disabled={!!busy} onClick={() => operation('verify')}><ShieldCheck />Verify integrity</button>
             {detail.status === 'attention' && <button className="button primary" disabled={!!busy} onClick={() => operation('repair')}><Sparkles />Repair replicas</button>}

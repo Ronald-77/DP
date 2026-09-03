@@ -44,7 +44,7 @@ Custodia is a dynamic local web application, not a static webpage. The React fro
 5. Open the new evidence item to inspect its file hash, Merkle root, chunks, replica nodes, metadata, and version history.
 6. Select **Verify integrity**. A healthy artifact shows a `healthy` result and the evidence remains `verified`.
 7. Select **Download**. Custodia reconstructs the file from valid replicas and checks the whole-file hash before downloading it.
-8. Select **Custody report** to download a JSON report containing the manifest, versions, custody events, and audit-chain status.
+8. Select **PDF custody report** to download a formatted report containing the manifest, versions, custody events, and audit-chain status. The JSON version remains available at `/api/evidence/<evidence-id>/report`.
 
 The same Case ID should be used for files from one investigation. Use a different Case ID for a different investigation. Case IDs are entered manually; Evidence IDs are generated automatically.
 
@@ -105,7 +105,7 @@ The invalid object is moved to `.data/nodes/<node>/quarantine/`, the valid bytes
 3. Download or verify an evidence item. It should still work when two valid assigned replicas remain.
 4. Mark the node **online** again.
 
-For a failure test, mark two assigned replica nodes offline. A read may fail because the 2-of-3 quorum is no longer available. Always return the nodes to **online** after the test.
+For a failure test, mark two assigned replica nodes offline. Verification reports `degraded`; with all three assigned replicas offline it reports `unrecoverable`, and a read fails because the 2-of-3 quorum is unavailable. Repair does not write to offline nodes. Always return the nodes to **online** after the test.
 
 ### Test roles
 
@@ -158,6 +158,7 @@ The default chunk size is 256 KiB. The sample evidence files are intentionally s
 - Online/offline node controls and quorum behavior
 - Full-replica integrity scans, corrupt-object quarantine, and automatic reconstruction
 - JSON chain-of-custody report export with manifests, versions, events, and certification data
+- PDF chain-of-custody report download for presentation and printing
 - Responsive operational UI for evidence, storage nodes, ledger activity, and recovery drills
 
 ## Try the corruption-recovery drill
@@ -196,6 +197,7 @@ Local deployment data lives in `.data/`:
 | `POST` | `/api/evidence/:id/verify` | Scan every assigned replica |
 | `POST` | `/api/evidence/:id/repair` | Quarantine and reconstruct bad replicas |
 | `GET` | `/api/evidence/:id/report` | Generate a custody report |
+| `GET` | `/api/evidence/:id/report.pdf` | Download a formatted PDF custody report |
 | `GET` | `/api/audit` | Validate and return the custody hash chain |
 | `PATCH` | `/api/nodes/:id` | Simulate node availability changes |
 
